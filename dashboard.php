@@ -20,14 +20,15 @@ if (isset($_GET['delete_id'])) {
 }
 
 // --- BUSCA DE MÉTRICAS GLOBAIS ---
-// Investimento e Total de Itens
-$est = $conn->query("SELECT SUM(stock * buy_price) as investimento, SUM(stock) as total_itens FROM products WHERE user_id = $uid")->fetch_assoc();
+// Investimento e Total de Itens (Valor em estoque hoje)
+$est = $conn->query("SELECT SUM(stock * buy_price) as investimento_estoque, SUM(stock) as total_itens FROM products WHERE user_id = $uid")->fetch_assoc();
 
 // Faturamento e Lucro Real (Baseado em vendas efetivas)
 $vnd = $conn->query("SELECT SUM(sale_price * quantity) as faturamento, SUM(total_profit) as lucro_real FROM sales WHERE user_id = $uid")->fetch_assoc();
 
 $faturamento = $vnd['faturamento'] ?? 0;
 $lucro_real = $vnd['lucro_real'] ?? 0;
+$investimento_total = $est['investimento_estoque'] ?? 0;
 $itens_estoque = $est['total_itens'] ?? 0;
 ?>
 
@@ -116,9 +117,9 @@ $itens_estoque = $est['total_itens'] ?? 0;
     <main class="max-w-6xl mx-auto p-4 md:p-8">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <a href="vendas.php" class="flex items-center justify-between p-6 bg-indigo-600 rounded-[2.5rem] shadow-xl shadow-indigo-100 group transition-all">
+            <a href="vendas.php" class="flex items-center justify-between p-6 bg-indigo-600 rounded-[8px] shadow-xl shadow-indigo-100 group transition-all">
                 <div class="flex items-center gap-4 text-white">
-                    <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl">
+                    <div class="w-14 h-14 bg-white/20 rounded-[2xl] flex items-center justify-center text-3xl">
                         <ion-icon name="cart-outline"></ion-icon>
                     </div>
                     <div>
@@ -129,9 +130,9 @@ $itens_estoque = $est['total_itens'] ?? 0;
                 <ion-icon name="chevron-forward" class="text-white text-2xl group-hover:translate-x-2 transition-transform"></ion-icon>
             </a>
 
-            <a href="produtos_acao.php" class="flex items-center justify-between p-6 bg-white border-2 border-dashed border-indigo-200 rounded-[2.5rem] hover:bg-indigo-50 hover:border-indigo-400 transition-all group">
+            <a href="produtos_acao.php" class="flex items-center justify-between p-6 bg-white border-2 border-dashed border-indigo-200 rounded-[8px] hover:bg-indigo-50 hover:border-indigo-400 transition-all group">
                 <div class="flex items-center gap-4 text-indigo-600">
-                    <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-3xl text-white">
+                    <div class="w-14 h-14 bg-indigo-600 rounded-[2xl] flex items-center justify-center text-3xl text-white">
                         <ion-icon name="add-outline"></ion-icon>
                     </div>
                     <div>
@@ -143,19 +144,26 @@ $itens_estoque = $est['total_itens'] ?? 0;
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-[8px] border border-slate-100 shadow-sm">
+                <p class="text-slate-400 text-[10px] font-bold uppercase mb-1">Investimento (Estoque)</p>
+                <h2 class="text-2xl font-bold text-amber-600"><?= number_format($investimento_total, 0, ',', '.') ?> MT</h2>
+            </div>
+
+            <div class="bg-white p-6 rounded-[8px] border border-slate-100 shadow-sm overflow-hidden relative">
                 <p class="text-slate-400 text-[10px] font-bold uppercase mb-1">Lucro Acumulado</p>
-                <h2 class="text-3xl font-bold text-emerald-600"><?= number_format($lucro_real, 0, ',', '.') ?> MT</h2>
+                <h2 class="text-2xl font-bold text-emerald-600"><?= number_format($lucro_real, 0, ',', '.') ?> MT</h2>
                 <div class="absolute -right-2 -bottom-2 text-6xl text-emerald-50 opacity-50"><ion-icon name="cash"></ion-icon></div>
             </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+
+            <div class="bg-white p-6 rounded-[8px] border border-slate-100 shadow-sm">
                 <p class="text-slate-400 text-[10px] font-bold uppercase mb-1">Faturamento Total</p>
-                <h2 class="text-3xl font-bold text-slate-800"><?= number_format($faturamento, 0, ',', '.') ?> MT</h2>
+                <h2 class="text-2xl font-bold text-slate-800"><?= number_format($faturamento, 0, ',', '.') ?> MT</h2>
             </div>
-            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+
+            <div class="bg-white p-6 rounded-[8px] border border-slate-100 shadow-sm">
                 <p class="text-slate-400 text-[10px] font-bold uppercase mb-1">Peças em Estoque</p>
-                <h2 class="text-3xl font-bold text-indigo-600"><?= $itens_estoque ?> <span class="text-sm font-normal text-slate-300 italic">unid.</span></h2>
+                <h2 class="text-2xl font-bold text-indigo-600"><?= $itens_estoque ?> <span class="text-sm font-normal text-slate-300 italic">unid.</span></h2>
             </div>
         </div>
 
@@ -178,7 +186,7 @@ $itens_estoque = $est['total_itens'] ?? 0;
                 $vendidos = $p['vendidos'] ?? 0;
                 $alerta_estoque = ($p['stock'] <= 3);
             ?>
-            <div class="card-premium bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
+            <div class="card-premium bg-white p-6 rounded-[8px] border border-slate-200 shadow-sm relative overflow-hidden flex flex-col justify-between">
                 
                 <?php if($alerta_estoque): ?>
                     <div class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-widest">Estoque Crítico</div>
