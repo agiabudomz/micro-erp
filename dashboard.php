@@ -65,12 +65,12 @@ $itens_estoque = $est['total_itens'] ?? 0;
             </a>
 
             <div class="hidden md:flex items-center gap-1 font-medium text-sm">
-                <a href="dashboard.php" class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl transition-all">
+                <a href="index.php" class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl transition-all">
                     <ion-icon name="home"></ion-icon>
                     <span>Home</span>
                 </a>
                 
-                <a href="manage_product.php" class="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all">
+                <a href="produtos_acao.php" class="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all">
                     <ion-icon name="add-circle-outline"></ion-icon>
                     <span>Novo Produto</span>
                 </a>
